@@ -1,4 +1,4 @@
-export default class Simulation4 {
+export default class Canvas4 {
   $parent;
   $target;
   constructor(parent) {

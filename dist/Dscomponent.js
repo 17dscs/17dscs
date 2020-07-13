@@ -1,4 +1,4 @@
-class Simulation4 {
+class Canvas4 {
   $parent;
   $target;
   constructor(parent) {
@@ -16,7 +16,7 @@ class Simulation4 {
   }
 }
 
-class Simulation4$1 {
+class Simulation4 {
   $parent;
   $target;
   constructor(parent) {
@@ -42,8 +42,8 @@ class Dsc4 {
   constructor(parent) {
     this.$parent = parent;
     this.$target = document.createElement("div");
-    this.$simulationComp = new Simulation4$1(this.$target);
-    this.$canvasComp = new Simulation4(this.$target);
+    this.$simulationComp = new Simulation4(this.$target);
+    this.$canvasComp = new Canvas4(this.$target);
 
     this.render(this.$parent, this.$target);
 
