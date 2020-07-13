@@ -8,6 +8,6 @@ export default class Dscomponent {
     this.$container = $container;
     this.$target = null;
 
-    if ($container) this.$target = new Dsc4($container);
+    if ($container) this.$target = new Dsc4(this.$container);
   }
 }
