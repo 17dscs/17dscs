@@ -4,5 +4,4 @@ window.onload = () => {
   testDiv.style.height = "300px";
   testDiv.style.backgroundColor = "#dddddd";
   new Dscomponent("test");
-  console.log("test");
 };
