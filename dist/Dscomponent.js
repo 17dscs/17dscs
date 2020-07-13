@@ -1,16 +1,58 @@
-class Dsc4 {
-  $container;
+class Simulation4 {
+  $parent;
   $target;
   constructor(parent) {
     this.$parent = parent;
     this.$target = document.createElement("div");
+
     this.render(this.$parent, this.$target);
-    this.$target.innerHTML = "Hello";
+
+    this.$target.style.height = "200px";
+    this.$target.style.backgroundColor = "red";
   }
 
-  render($container, element) {
-    $container.innerHTML = "";
-    $container.append(element);
+  render($parent, element) {
+    $parent.append(element);
+  }
+}
+
+class Simulation4$1 {
+  $parent;
+  $target;
+  constructor(parent) {
+    this.$parent = parent;
+    this.$target = document.createElement("div");
+
+    this.render(this.$parent, this.$target);
+
+    this.$target.style.height = "100px";
+    this.$target.style.backgroundColor = "blue";
+  }
+
+  render($parent, element) {
+    $parent.append(element);
+  }
+}
+
+class Dsc4 {
+  $parent;
+  $target;
+  $simulationComp;
+  $canvasComp;
+  constructor(parent) {
+    this.$parent = parent;
+    this.$target = document.createElement("div");
+    this.$simulationComp = new Simulation4$1(this.$target);
+    this.$canvasComp = new Simulation4(this.$target);
+
+    this.render(this.$parent, this.$target);
+
+    this.$target.style.display = "flex";
+    this.$target.style.flexDirection = "column";
+  }
+
+  render($parent, element) {
+    $parent.append(element);
   }
 }
 
@@ -22,6 +64,6 @@ class Dscomponent {
     this.$container = $container;
     this.$target = null;
 
-    if ($container) this.$target = new Dsc4($container);
+    if ($container) this.$target = new Dsc4(this.$container);
   }
 }
