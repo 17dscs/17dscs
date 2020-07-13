@@ -3,12 +3,35 @@ class Canvas4 {
   $target;
   constructor(parent) {
     this.$parent = parent;
+    this.$target = document.createElement("canvas");
+
+    this.render(this.$parent, this.$target);
+
+    this.$target.style.margin = "5px";
+    this.$target.style.backgroundColor = "brown";
+  }
+
+  render($parent, element) {
+    $parent.append(element);
+  }
+}
+
+class Canvas4$1 {
+  $parent;
+  $target;
+  $actionCanvas;
+  constructor(parent) {
+    this.$parent = parent;
     this.$target = document.createElement("div");
+    this.$actionCanvas = new Canvas4(this.$target);
 
     this.render(this.$parent, this.$target);
 
     this.$target.style.height = "200px";
     this.$target.style.backgroundColor = "red";
+    this.$target.style.display = "flex";
+    this.$target.style.justifyContent = "center";
+    this.$target.style.alignItems = "center";
   }
 
   render($parent, element) {
@@ -43,7 +66,7 @@ class Dsc4 {
     this.$parent = parent;
     this.$target = document.createElement("div");
     this.$simulationComp = new Simulation4(this.$target);
-    this.$canvasComp = new Canvas4(this.$target);
+    this.$canvasComp = new Canvas4$1(this.$target);
 
     this.render(this.$parent, this.$target);
 
