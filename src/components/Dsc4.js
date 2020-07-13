@@ -1,4 +1,4 @@
-export default class Dscomponent {
+export default class Dsc4 {
   $container;
   $target;
   constructor(parent) {

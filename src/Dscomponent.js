@@ -1,3 +1,5 @@
+import Dsc4 from "./components/Dsc4";
+
 export default class Dscomponent {
   $container;
   $target;
