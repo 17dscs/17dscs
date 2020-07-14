@@ -1,17 +1,6 @@
 function randomColor(bigBalls) {
-  let red = Math.floor(Math.random() * 3) * 127;
-  let green = Math.floor(Math.random() * 3) * 127;
-  let blue = Math.floor(Math.random() * 3) * 127;
-
-  // dim down the small balls
-  if (!bigBalls) {
-    red *= 0.65;
-    green *= 0.65;
-    blue *= 0.65;
-  }
-
-  let rc = "rgb(" + red + ", " + green + ", " + blue + ")";
-  return rc;
+  // return rc;
+  return "pink";
 }
 
 function randomX(canvas) {
@@ -39,8 +28,8 @@ function randomRadius(bigBalls) {
     let r = Math.ceil(Math.random() * 10 + 20);
     return r;
   } else {
-    let r = Math.ceil(Math.random() * 2 + 2);
-    //let r = 5;
+    // let r = Math.ceil(Math.random() * 2 + 2);
+    let r = 5;
     return r;
   }
 }
@@ -71,7 +60,7 @@ class Ball {
     // mass is that of a sphere as opposed to circle
     // it *does* make a difference in how realistic it looks
     this.mass = this.radius * this.radius * this.radius;
-    this.color = randomColor(bigBalls);
+    this.color = randomColor();
   }
 
   draw(ctx) {
@@ -97,10 +86,31 @@ class Ball {
   }
 }
 
+class Data {
+  constructor() {
+    this.time = 0;
+  }
+  increase() {
+    this.time += 1;
+  }
+}
+
+const data = new Data();
+
 function actionCanvas(canvas) {
   let ctx = canvas.getContext("2d");
 
   let objArray = [];
+  let paused = false;
+
+  let mouseon = false;
+  let offsetX = 0;
+  let offsetY = 0;
+  let mousePosition = false;
+
+  let gravityOn = false;
+
+  let clearCanv = true;
 
   let bigBalls = false;
 
@@ -108,20 +118,42 @@ function actionCanvas(canvas) {
   let currentTime = 0;
   let dt = 0;
 
-  let numStartingSmallBalls = 20;
-  let numStartingBigBalls = 2;
+  let numStartingSmallBalls = 32;
+  let numStartingBigBalls = 0;
+
+  document.addEventListener("keydown", keyDownHandler);
 
   function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
   function canvasBackground() {
-    canvas.style.backgroundColor = "rgb(215, 235, 240)";
+    if (mousePosition === "right") {
+      canvas.style.backgroundColor = "black";
+    } else {
+      canvas.style.backgroundColor = "rgb(215, 235, 240)";
+    }
+    ctx.beginPath();
+    ctx.rect(0, 0, canvas.width / 2, canvas.height);
+    if (mousePosition === "left") {
+      ctx.fillStyle = "black";
+    } else {
+      ctx.fillStyle = "red";
+    }
+    ctx.fill();
   }
 
   function wallCollision(ball) {
-    if (ball.x - ball.radius + ball.dx < 0 || ball.x + ball.radius + ball.dx > canvas.width) {
-      ball.dx *= -1;
+    // console.log(ball);
+    if (ball.x < canvas.width / 2) {
+      if (ball.x - ball.radius + ball.dx < 0 || ball.x + ball.radius + ball.dx > canvas.width / 2) {
+        ball.dx *= -1;
+      }
+    }
+    if (ball.x > canvas.width / 2) {
+      if (ball.x - ball.radius + ball.dx < canvas.width / 2 || ball.x + ball.radius + ball.dx > canvas.width) {
+        ball.dx *= -1;
+      }
     }
     if (ball.y - ball.radius + ball.dy < 0 || ball.y + ball.radius + ball.dy > canvas.height) {
       ball.dy *= -1;
@@ -199,6 +231,62 @@ function actionCanvas(canvas) {
     }
   }
 
+  function keyDownHandler(event) {
+    if (event.keyCode == 67) {
+      // c
+      objArray[objArray.length] = new Ball(randomX(canvas), randomY(canvas), 5, bigBalls);
+      data.increase();
+      console.log(data);
+    } else if (event.keyCode == 80) {
+      // p
+      paused = !paused;
+    } else if (event.keyCode == 71) {
+      // g
+      // This feature WAS taken out
+      // because of a bug where
+      // balls "merge" with each other
+      // when under a lot of pressure.
+
+      // putting back in
+
+      gravityOn = !gravityOn;
+    } else if (event.keyCode == 65) {
+      // A
+      leftHeld = true;
+    } else if (event.keyCode == 87) {
+      // W
+      upHeld = true;
+    } else if (event.keyCode == 68) {
+      // D
+      rightHeld = true;
+    } else if (event.keyCode == 83) {
+      // S
+      downHeld = true;
+    } else if (event.keyCode == 82) {
+      // r
+      objArray = [];
+    } else if (event.keyCode == 75) {
+      // k
+      clearCanv = !clearCanv;
+    } else if (event.keyCode == 88) {
+      // x
+      bigBalls = !bigBalls;
+    }
+  }
+
+  function applyGravity() {
+    for (let obj in objArray) {
+      let ob = objArray[obj];
+      if (ob.onGround() == false) {
+        ob.dy += 0.29;
+      }
+
+      // apply basic drag
+      ob.dx *= 0.99;
+      ob.dy *= 0.975;
+    }
+  }
+
   function moveObjects() {
     for (let i = 0; i < objArray.length; i++) {
       let ob = objArray[i];
@@ -220,17 +308,30 @@ function actionCanvas(canvas) {
     // dirty and lazy solution
     // instead of scaling up every velocity vector the program
     // we increase the speed of time
-    dt *= 10;
+    dt *= 20;
 
-    clearCanvas();
+    if (clearCanv) clearCanvas();
     canvasBackground();
 
-    {
+    if (!paused) {
+      if (gravityOn) {
+        applyGravity(); // (and drag)
+      }
       moveObjects();
       ballCollision();
     }
 
     drawObjects();
+
+    if (mouseon) {
+      // The size of the emoji is set with the font
+      ctx.font = "20px serif";
+      // use these alignment properties for "better" positioning
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      // draw the emoji
+      ctx.fillText("☁️", offsetX, offsetY);
+    }
 
     //logger();
 
@@ -240,7 +341,7 @@ function actionCanvas(canvas) {
 
   // spawn the initial small thingies.
   for (i = 0; i < numStartingSmallBalls; i++) {
-    objArray[objArray.length] = new Ball(randomX(canvas), randomY(canvas), randomRadius(bigBalls), bigBalls);
+    objArray[objArray.length] = new Ball(randomX(canvas), randomY(canvas), 5, bigBalls);
   }
 
   // manually spawn the few large ones that
@@ -253,7 +354,37 @@ function actionCanvas(canvas) {
     objArray[objArray.length] = temp;
   }
 
+  setInterval(() => {
+    for (let i = 0; i < objArray.length; i++) {
+      if (objArray[i].x > canvas.width / 2) {
+        objArray.splice(i, 1);
+        objArray[objArray.length] = new Ball(30, randomY(canvas), 5, bigBalls);
+        break;
+      }
+    }
+  }, 500);
+
   draw();
+
+  canvas.addEventListener("mousemove", onMouseMove, false);
+  function onMouseMove(e) {
+    mouseon = true;
+    offsetX = e.offsetX;
+    offsetY = e.offsetY;
+    if (e.offsetX < canvas.width / 2) {
+      mousePosition = "left";
+    } else {
+      mousePosition = "right";
+    }
+  }
+  canvas.addEventListener(
+    "mouseleave",
+    () => {
+      mouseon = false;
+      mousePosition = false;
+    },
+    false,
+  );
 }
 
 class Canvas4 {
@@ -294,6 +425,10 @@ class Simulation4 {
 
     this.$target.style.height = "100px";
     this.$target.style.backgroundColor = "blue";
+    this.$target.addEventListener("mouseenter", () => {
+      data.increase();
+      console.log(data);
+    });
   }
 
   render($parent, element) {

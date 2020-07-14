@@ -11,7 +11,8 @@ export function randomColor(bigBalls) {
   }
 
   let rc = "rgb(" + red + ", " + green + ", " + blue + ")";
-  return rc;
+  // return rc;
+  return "pink";
 }
 
 export function randomX(canvas) {
@@ -39,8 +40,8 @@ export function randomRadius(bigBalls) {
     let r = Math.ceil(Math.random() * 10 + 20);
     return r;
   } else {
-    let r = Math.ceil(Math.random() * 2 + 2);
-    //let r = 5;
+    // let r = Math.ceil(Math.random() * 2 + 2);
+    let r = 5;
     return r;
   }
 }

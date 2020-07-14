@@ -1,3 +1,5 @@
+import data from "../datas/data";
+
 export default class Simulation4 {
   $parent;
   $target;
@@ -9,6 +11,10 @@ export default class Simulation4 {
 
     this.$target.style.height = "100px";
     this.$target.style.backgroundColor = "blue";
+    this.$target.addEventListener("mouseenter", () => {
+      data.increase();
+      console.log(data);
+    });
   }
 
   render($parent, element) {
