@@ -8,12 +8,6 @@ export default function actionCanvas(canvas) {
   let paused = false;
   let bumped = false;
 
-  let leftHeld = false;
-  let upHeld = false;
-  let rightHeld = false;
-  let downHeld = false;
-  let arrowControlSpeed = 0.25;
-
   let gravityOn = false;
 
   let clearCanv = true;
@@ -29,33 +23,6 @@ export default function actionCanvas(canvas) {
 
   function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
-
-  function arrowControls() {
-    if (leftHeld) {
-      // left arrow
-      for (let obj in objArray) {
-        objArray[obj].dx -= arrowControlSpeed / objArray[obj].radius;
-      }
-    }
-    if (upHeld) {
-      // up arrow
-      for (let obj in objArray) {
-        objArray[obj].dy -= arrowControlSpeed / objArray[obj].radius;
-      }
-    }
-    if (rightHeld) {
-      // right arrow
-      for (let obj in objArray) {
-        objArray[obj].dx += arrowControlSpeed / objArray[obj].radius;
-      }
-    }
-    if (downHeld) {
-      // down arrow
-      for (let obj in objArray) {
-        objArray[obj].dy += arrowControlSpeed / objArray[obj].radius;
-      }
-    }
   }
 
   function canvasBackground() {
@@ -176,13 +143,12 @@ export default function actionCanvas(canvas) {
     // dirty and lazy solution
     // instead of scaling up every velocity vector the program
     // we increase the speed of time
-    dt *= 5;
+    dt *= 10;
 
     if (clearCanv) clearCanvas();
     canvasBackground();
 
     if (!paused) {
-      arrowControls();
       if (gravityOn) {
         applyGravity(); // (and drag)
       }

@@ -9,6 +9,8 @@ export default class Canvas4 {
     this.$target = document.createElement("div");
     this.$actionCanvas = document.createElement("canvas");
     this.$actionCanvas.id = "test-canvas";
+    this.$actionCanvas.width = "400";
+    this.$actionCanvas.height = "200";
 
     this.render(this.$parent, this.$target);
     this.render(this.$target, this.$actionCanvas);
