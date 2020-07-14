@@ -24,8 +24,8 @@ export default function actionCanvas(canvas) {
   let currentTime = 0;
   let dt = 0;
 
-  let numStartingSmallBalls = 235;
-  let numStartingBigBalls = 8;
+  let numStartingSmallBalls = 20;
+  let numStartingBigBalls = 2;
 
   function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -176,7 +176,7 @@ export default function actionCanvas(canvas) {
     // dirty and lazy solution
     // instead of scaling up every velocity vector the program
     // we increase the speed of time
-    dt *= 50;
+    dt *= 5;
 
     if (clearCanv) clearCanvas();
     canvasBackground();
