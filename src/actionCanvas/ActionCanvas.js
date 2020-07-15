@@ -3,6 +3,7 @@ import { randomRadius, randomX, randomY, randomDx, randomDy, distance } from "./
 import data from "../datas/data";
 
 export default function actionCanvas(canvas) {
+  data.run();
   let ctx = canvas.getContext("2d");
 
   let objArray = [];
@@ -24,7 +25,7 @@ export default function actionCanvas(canvas) {
   let currentTime = 0;
   let dt = 0;
 
-  let numStartingSmallBalls = 32;
+  let numStartingSmallBalls = data.getTotalLearner();
   let numStartingBigBalls = 0;
 
   document.addEventListener("keydown", keyDownHandler);
@@ -141,8 +142,6 @@ export default function actionCanvas(canvas) {
     if (event.keyCode == 67) {
       // c
       objArray[objArray.length] = new Ball(randomX(canvas), randomY(canvas), 5, bigBalls);
-      data.increase();
-      console.log(data);
     } else if (event.keyCode == 80) {
       // p
       paused = !paused;
@@ -265,14 +264,18 @@ export default function actionCanvas(canvas) {
   }
 
   setInterval(() => {
-    for (let i = 0; i < objArray.length; i++) {
-      if (objArray[i].x > canvas.width / 2) {
-        objArray.splice(i, 1);
-        objArray[objArray.length] = new Ball(30, randomY(canvas), 5, bigBalls);
-        break;
-      }
+    console.log(data.getAffectedLearner(), data.getSubtractAffectedLearner(), data.getTotalLearner());
+    console.log(objArray.length);
+    for (let j = 0; j < data.getSubtractAffectedLearner(); j++) {
+      objArray.pop();
     }
-  }, 500);
+    // if (objArray[i].x > canvas.width / 2) {
+    //   console.log(data.getAffectedLearner(), data.getTotalLearner());
+    //   objArray.splice(i, 1);
+    //   objArray[objArray.length] = new Ball(30, randomY(canvas), 5, bigBalls);
+    //   break;
+    // }
+  }, 1000);
 
   draw();
 
