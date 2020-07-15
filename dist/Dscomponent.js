@@ -370,7 +370,8 @@ function actionCanvas(canvas) {
     objArray[objArray.length] = temp;
   }
 
-  setInterval(() => {
+  const interval = setInterval(() => {
+    if (data.getAffectedLearner() > data.getTotalLearner()) clearInterval(interval);
     console.log(data.getAffectedLearner(), data.getSubtractAffectedLearner(), data.getTotalLearner());
     console.log(objArray.length);
     for (let j = 0; j < data.getSubtractAffectedLearner(); j++) {
