@@ -47,13 +47,19 @@ export function randomRadius(bigBalls) {
 }
 
 export function randomDx() {
-  let r = Math.floor(Math.random() * 10 - 4);
-  return r;
+  const dxs = [2, -2];
+  let r = Math.floor(Math.random() * 2);
+  return dxs[r];
+  // let r = Math.floor(Math.random() * 10 - 4);
+  // return r;
 }
 
 export function randomDy() {
-  let r = Math.floor(Math.random() * 10 - 3);
-  return r;
+  const dys = [2, -2];
+  let r = Math.floor(Math.random() * 2);
+  return dys[r];
+  // let r = Math.floor(Math.random() * 10 - 3);
+  // return r;
 }
 
 export function distanceNextFrame(a, b) {

@@ -35,13 +35,19 @@ function randomRadius(bigBalls) {
 }
 
 function randomDx() {
-  let r = Math.floor(Math.random() * 10 - 4);
-  return r;
+  const dxs = [2, -2];
+  let r = Math.floor(Math.random() * 2);
+  return dxs[r];
+  // let r = Math.floor(Math.random() * 10 - 4);
+  // return r;
 }
 
 function randomDy() {
-  let r = Math.floor(Math.random() * 10 - 3);
-  return r;
+  const dys = [2, -2];
+  let r = Math.floor(Math.random() * 2);
+  return dys[r];
+  // let r = Math.floor(Math.random() * 10 - 3);
+  // return r;
 }
 
 function distance(a, b) {
@@ -50,7 +56,7 @@ function distance(a, b) {
 
 class Ball {
   constructor(x, y, radius, bigBalls) {
-    this.radius = radius;
+    this.radius = 10;
     this.x = x;
     this.y = y;
 
@@ -115,7 +121,7 @@ class Data {
 const data = new Data();
 
 function actionCanvas(canvas) {
-  data.run();
+  // data.run();
   let ctx = canvas.getContext("2d");
 
   let objArray = [];
@@ -136,7 +142,8 @@ function actionCanvas(canvas) {
   let currentTime = 0;
   let dt = 0;
 
-  let numStartingSmallBalls = data.getTotalLearner();
+  // let numStartingSmallBalls = data.getTotalLearner();
+  let numStartingSmallBalls = 15;
   let numStartingBigBalls = 0;
 
   document.addEventListener("keydown", keyDownHandler);
@@ -163,12 +170,12 @@ function actionCanvas(canvas) {
 
   function wallCollision(ball) {
     // console.log(ball);
-    if (ball.x < canvas.width / 2) {
+    if (ball.x < canvas.width / 2 - ball.radius) {
       if (ball.x - ball.radius + ball.dx < 0 || ball.x + ball.radius + ball.dx > canvas.width / 2) {
         ball.dx *= -1;
       }
     }
-    if (ball.x > canvas.width / 2) {
+    if (ball.x > canvas.width / 2 + ball.radius) {
       if (ball.x - ball.radius + ball.dx < canvas.width / 2 || ball.x + ball.radius + ball.dx > canvas.width) {
         ball.dx *= -1;
       }
@@ -193,30 +200,21 @@ function actionCanvas(canvas) {
   function ballCollision() {
     for (let i = 0; i < objArray.length - 1; i++) {
       for (let j = i + 1; j < objArray.length; j++) {
-        let ob1 = objArray[i];
-        let ob2 = objArray[j];
-        let dist = distance(ob1, ob2);
+        let obj1 = objArray[i];
+        let obj2 = objArray[j];
+        let dist = distance(obj1, obj2);
+        if (dist < obj1.radius + obj2.radius) {
+          let vCollision = { x: obj2.x - obj1.x, y: obj2.y - obj1.y };
+          let _distance = Math.sqrt((obj2.x - obj1.x) * (obj2.x - obj1.x) + (obj2.y - obj1.y) * (obj2.y - obj1.y));
+          let vCollisionNorm = { x: vCollision.x / _distance, y: vCollision.y / _distance };
+          let vRelativeVelocity = { x: obj1.dx - obj2.dx, y: obj1.dy - obj2.dy };
+          let speed = vRelativeVelocity.x * vCollisionNorm.x + vRelativeVelocity.y * vCollisionNorm.y;
 
-        if (dist < ob1.radius + ob2.radius) {
-          let theta1 = ob1.angle();
-          let theta2 = ob2.angle();
-          let phi = Math.atan2(ob2.y - ob1.y, ob2.x - ob1.x);
-          let m1 = ob1.mass;
-          let m2 = ob2.mass;
-          let v1 = ob1.speed();
-          let v2 = ob2.speed();
-
-          let dx1F = ((v1 * Math.cos(theta1 - phi) * (m1 - m2) + 2 * m2 * v2 * Math.cos(theta2 - phi)) / (m1 + m2)) * Math.cos(phi) + v1 * Math.sin(theta1 - phi) * Math.cos(phi + Math.PI / 2);
-          let dy1F = ((v1 * Math.cos(theta1 - phi) * (m1 - m2) + 2 * m2 * v2 * Math.cos(theta2 - phi)) / (m1 + m2)) * Math.sin(phi) + v1 * Math.sin(theta1 - phi) * Math.sin(phi + Math.PI / 2);
-          let dx2F = ((v2 * Math.cos(theta2 - phi) * (m2 - m1) + 2 * m1 * v1 * Math.cos(theta1 - phi)) / (m1 + m2)) * Math.cos(phi) + v2 * Math.sin(theta2 - phi) * Math.cos(phi + Math.PI / 2);
-          let dy2F = ((v2 * Math.cos(theta2 - phi) * (m2 - m1) + 2 * m1 * v1 * Math.cos(theta1 - phi)) / (m1 + m2)) * Math.sin(phi) + v2 * Math.sin(theta2 - phi) * Math.sin(phi + Math.PI / 2);
-
-          ob1.dx = dx1F;
-          ob1.dy = dy1F;
-          ob2.dx = dx2F;
-          ob2.dy = dy2F;
-
-          staticCollision(ob1, ob2);
+          obj1.dx -= speed * vCollisionNorm.x;
+          obj1.dy -= speed * vCollisionNorm.y;
+          obj2.dx += speed * vCollisionNorm.x;
+          obj2.dy += speed * vCollisionNorm.y;
+          staticCollision(obj1, obj2);
         }
       }
       wallCollision(objArray[i]);
@@ -227,8 +225,10 @@ function actionCanvas(canvas) {
 
   function staticCollision(ob1, ob2, emergency = false) {
     let overlap = ob1.radius + ob2.radius - distance(ob1, ob2);
-    let smallerObject = ob1.radius < ob2.radius ? ob1 : ob2;
-    let biggerObject = ob1.radius > ob2.radius ? ob1 : ob2;
+    // let smallerObject = ob1.radius < ob2.radius ? ob1 : ob2;
+    // let biggerObject = ob1.radius > ob2.radius ? ob1 : ob2;
+    let smallerObject = ob1;
+    let biggerObject = ob2;
 
     // When things go normally, this line does not execute.
     // "Emergency" is when staticCollision has run, but the collision

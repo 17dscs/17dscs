@@ -2,7 +2,7 @@ import { randomDx, randomDy, randomColor } from "./utils";
 
 export default class Ball {
   constructor(x, y, radius, bigBalls) {
-    this.radius = radius;
+    this.radius = 10;
     this.x = x;
     this.y = y;
 
