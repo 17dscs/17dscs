@@ -1,0 +1,73 @@
+<html>
+  <head>
+    <!-- d3.js -->
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <!-- chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+  </head>
+  <body>
+    <canvas id="myChart" width="400" height="200"></canvas>
+    <script>
+      var ctx = document.getElementById("myChart").getContext("2d");
+      var myChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
+          datasets: [
+            {
+              label: "# of Votes",
+              data: [12, 19, 3, 5, 2, 3],
+              backgroundColor: [
+                "rgba(255, 99, 132, 0.2)",
+                "rgba(54, 162, 235, 0.2)",
+                "rgba(255, 206, 86, 0.2)",
+                "rgba(75, 192, 192, 0.2)",
+                "rgba(153, 102, 255, 0.2)",
+                "rgba(255, 159, 64, 0.2)",
+              ],
+              borderColor: [
+                "rgba(255, 99, 132, 1)",
+                "rgba(54, 162, 235, 1)",
+                "rgba(255, 206, 86, 1)",
+                "rgba(75, 192, 192, 1)",
+                "rgba(153, 102, 255, 1)",
+                "rgba(255, 159, 64, 1)",
+              ],
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          animation: {
+            duration: 0,
+          },
+          scales: {
+            yAxes: [
+              {
+                ticks: {
+                  beginAtZero: true,
+                },
+              },
+            ],
+          },
+        },
+      });
+      // label 변경
+      myChart.data.labels = ["R", "B", "Y", "G", "P", "O"];
+      // 그냥 마치, 딕셔너리 리스트의 자료구조인 것처럼 접근해서 값을 변경해줘도 문제없습니다.
+      myChart.data.datasets[0].data = [1, 2, 3, 4, 5, 6];
+      myChart.update();
+      var frame_duration = 1000;
+      var i = 0;
+      d3.interval(function () {
+        if (i > 10) {
+          this.stop();
+        } else {
+          myChart.data.datasets[0].data = [1 + i, 2 + i, 3 + i, 4 + i, 5 + i, 6 + i];
+          myChart.update(); // 데이터를 바꾼 다음, 이렇게 업데이트를 해야 적용된다.
+        }
+        i = i + 1;
+      }, frame_duration);
+    </script>
+  </body>
+</html>

@@ -3,6 +3,12 @@ class Data {
     this.affectedLearner = 999014;
     this.pastAffectedLearner = 0;
     this.totalLearner = this.affectedLearner * 1000;
+    this.covidData = {
+      "0216": 1,
+      "0301": 17.1,
+      "0316": 44,
+      "0401": 91.3,
+    };
   }
   getSubtractAffectedLearner() {
     return Math.floor(this.affectedLearner / 10000000) - Math.floor(this.pastAffectedLearner / 10000000);

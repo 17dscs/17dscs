@@ -25,8 +25,7 @@ export default function actionCanvas(canvas) {
   let currentTime = 0;
   let dt = 0;
 
-  // let numStartingSmallBalls = data.getTotalLearner();
-  let numStartingSmallBalls = 15;
+  let numStartingSmallBalls = data.getTotalLearner();
   let numStartingBigBalls = 0;
 
   document.addEventListener("keydown", keyDownHandler);
@@ -304,20 +303,23 @@ export default function actionCanvas(canvas) {
     objArray[objArray.length] = temp;
   }
 
-  const interval = setInterval(() => {
-    if (data.getAffectedLearner() > data.getTotalLearner()) clearInterval(interval);
-    console.log(data.getAffectedLearner(), data.getSubtractAffectedLearner(), data.getTotalLearner());
-    console.log(objArray.length);
-    for (let j = 0; j < data.getSubtractAffectedLearner(); j++) {
-      objArray.pop();
-    }
-    // if (objArray[i].x > canvas.width / 2) {
-    //   console.log(data.getAffectedLearner(), data.getTotalLearner());
-    //   objArray.splice(i, 1);
-    //   objArray[objArray.length] = new Ball(30, randomY(canvas), 5, bigBalls);
-    //   break;
-    // }
-  }, 1000);
+  setTimeout(() => {
+    const interval = setInterval(() => {
+      objArray.splice(0, 1);
+      objArray[objArray.length] = new Ball(30, randomY(canvas), 5, bigBalls);
+      // if (data.getAffectedLearner() > data.getTotalLearner()) clearInterval(interval);
+      // // console.log(data.getAffectedLearner(), data.getSubtractAffectedLearner(), data.getTotalLearner());
+      // // console.log(objArray.length);
+      // for (let j = 0; j < data.getSubtractAffectedLearner(); j++) {
+      //   if (objArray[i].x > canvas.width / 2) {
+      //     console.log(data.getAffectedLearner(), data.getTotalLearner());
+      //     objArray.splice(i, 1);
+      //     objArray[objArray.length] = new Ball(30, randomY(canvas), 5, bigBalls);
+      //     break;
+      //   }
+      // }
+    }, 100);
+  }, 5000);
 
   draw();
 

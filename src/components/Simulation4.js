@@ -1,20 +1,19 @@
 import data from "../datas/data";
+import chart from "../simulators/chart";
 
 export default class Simulation4 {
   $parent;
   $target;
   constructor(parent) {
     this.$parent = parent;
-    this.$target = document.createElement("div");
+    this.$target = document.createElement("canvas");
+    this.$target.id = "test-canvas2";
+    this.$target.width = "400";
+    this.$target.height = "100";
 
     this.render(this.$parent, this.$target);
 
-    this.$target.style.height = "100px";
-    this.$target.style.backgroundColor = "blue";
-    this.$target.addEventListener("mouseenter", () => {
-      data.increase();
-      console.log(data);
-    });
+    chart(this.$target);
   }
 
   render($parent, element) {

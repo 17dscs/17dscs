@@ -4,7 +4,7 @@ function randomColor(bigBalls) {
 }
 
 function randomX(canvas) {
-  let x = Math.floor(Math.random() * canvas.width);
+  let x = Math.floor(Math.random() * canvas.width + canvas.width / 2);
   if (x < 30) {
     x = 30;
   } else if (x + 30 > canvas.width) {
@@ -56,7 +56,7 @@ function distance(a, b) {
 
 class Ball {
   constructor(x, y, radius, bigBalls) {
-    this.radius = 10;
+    this.radius = radius;
     this.x = x;
     this.y = y;
 
@@ -97,6 +97,12 @@ class Data {
     this.affectedLearner = 999014;
     this.pastAffectedLearner = 0;
     this.totalLearner = this.affectedLearner * 1000;
+    this.covidData = {
+      "0216": 1,
+      "0301": 17.1,
+      "0316": 44,
+      "0401": 91.3,
+    };
   }
   getSubtractAffectedLearner() {
     return Math.floor(this.affectedLearner / 10000000) - Math.floor(this.pastAffectedLearner / 10000000);
@@ -142,8 +148,7 @@ function actionCanvas(canvas) {
   let currentTime = 0;
   let dt = 0;
 
-  // let numStartingSmallBalls = data.getTotalLearner();
-  let numStartingSmallBalls = 15;
+  let numStartingSmallBalls = data.getTotalLearner();
   let numStartingBigBalls = 0;
 
   document.addEventListener("keydown", keyDownHandler);
@@ -370,20 +375,23 @@ function actionCanvas(canvas) {
     objArray[objArray.length] = temp;
   }
 
-  const interval = setInterval(() => {
-    if (data.getAffectedLearner() > data.getTotalLearner()) clearInterval(interval);
-    console.log(data.getAffectedLearner(), data.getSubtractAffectedLearner(), data.getTotalLearner());
-    console.log(objArray.length);
-    for (let j = 0; j < data.getSubtractAffectedLearner(); j++) {
-      objArray.pop();
-    }
-    // if (objArray[i].x > canvas.width / 2) {
-    //   console.log(data.getAffectedLearner(), data.getTotalLearner());
-    //   objArray.splice(i, 1);
-    //   objArray[objArray.length] = new Ball(30, randomY(canvas), 5, bigBalls);
-    //   break;
-    // }
-  }, 1000);
+  setTimeout(() => {
+    const interval = setInterval(() => {
+      objArray.splice(0, 1);
+      objArray[objArray.length] = new Ball(30, randomY(canvas), 5, bigBalls);
+      // if (data.getAffectedLearner() > data.getTotalLearner()) clearInterval(interval);
+      // // console.log(data.getAffectedLearner(), data.getSubtractAffectedLearner(), data.getTotalLearner());
+      // // console.log(objArray.length);
+      // for (let j = 0; j < data.getSubtractAffectedLearner(); j++) {
+      //   if (objArray[i].x > canvas.width / 2) {
+      //     console.log(data.getAffectedLearner(), data.getTotalLearner());
+      //     objArray.splice(i, 1);
+      //     objArray[objArray.length] = new Ball(30, randomY(canvas), 5, bigBalls);
+      //     break;
+      //   }
+      // }
+    }, 100);
+  }, 5000);
 
   draw();
 
@@ -435,21 +443,121 @@ class Canvas4 {
   }
 }
 
+function chart(canvas) {
+  const covidData = data.covidData;
+  const tempCanvas = document.createElement("canvas");
+  tempCanvas.width = 400;
+  tempCanvas.height = 100;
+  const tempCtx = tempCanvas.getContext("2d");
+  var ctx = canvas.getContext("2d");
+
+  let lastTime = new Date().getTime();
+  let currentTime = 0;
+  let dt = 0;
+
+  const entries = Object.entries(covidData);
+
+  // setInterval(() => {
+  //   data.push(11);
+  // }, 1000);
+
+  drawTempChart();
+  drawChart();
+
+  function drawAxis() {
+    let yPlot = 90;
+    let pop = 0;
+
+    tempCtx.beginPath();
+    tempCtx.strokeStyle = "black";
+    tempCtx.moveTo(50, 20);
+    tempCtx.lineTo(50, 80);
+    tempCtx.lineTo(380, 80);
+    tempCtx.lineTo(380, 20);
+    tempCtx.lineTo(50, 20);
+    tempCtx.moveTo(50, 80);
+
+    for (let i = 0; i < 2; i++) {
+      tempCtx.strokeText(pop, 20, yPlot);
+      pop += 100;
+      yPlot -= 70;
+    }
+    tempCtx.stroke();
+  }
+
+  function drawTempChart() {
+    drawAxis();
+    tempCtx.beginPath();
+    tempCtx.strokeStyle = "black";
+    tempCtx.moveTo(50, 80);
+    tempCtx.font = "bold normal 10px Verdana";
+
+    var xPlot = 100;
+
+    for (const [key, value] of entries) {
+      var valueInBlocks = 100;
+      var valueY = (60 * (100 - value)) / 100 + 20;
+      tempCtx.fillText("(" + key + ")", xPlot, valueInBlocks - 5);
+      tempCtx.lineTo(xPlot, valueY);
+      xPlot += 50;
+    }
+    tempCtx.stroke();
+  }
+
+  function putImageData(ctx, imageData, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight) {
+    var data = imageData.data;
+    var height = imageData.height;
+    var width = imageData.width;
+    dirtyX = dirtyX || 0;
+    dirtyY = dirtyY || 0;
+    dirtyWidth = dirtyWidth !== undefined ? dirtyWidth : width;
+    dirtyHeight = dirtyHeight !== undefined ? dirtyHeight : height;
+    var limitBottom = dirtyY + dirtyHeight;
+    var limitRight = dirtyX + dirtyWidth;
+    for (var y = dirtyY; y < limitBottom; y++) {
+      for (var x = dirtyX; x < limitRight; x++) {
+        var pos = y * width + x;
+        ctx.fillStyle =
+          "rgba(" + data[pos * 4 + 0] + "," + data[pos * 4 + 1] + "," + data[pos * 4 + 2] + "," + data[pos * 4 + 3] / 255 + ")";
+        ctx.fillRect(x + dx, y + dy, 1, 1);
+      }
+    }
+  }
+
+  function drawChart() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    currentTime = new Date().getTime();
+    dt = (currentTime - lastTime) / 1000; // delta time in seconds
+
+    // dirty and lazy solution
+    // instead of scaling up every velocity vector the program
+    // we increase the speed of time
+    dt *= 20;
+    if (currentTime - lastTime < 20000) {
+      const imageData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
+      putImageData(ctx, imageData, 0, 0, 0, 0, dt, canvas.height);
+
+      requestAnimationFrame(drawChart);
+    } else {
+      const imageData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
+      putImageData(ctx, imageData, 0, 0, 0, 0, canvas.width, canvas.height);
+    }
+  }
+}
+
 class Simulation4 {
   $parent;
   $target;
   constructor(parent) {
     this.$parent = parent;
-    this.$target = document.createElement("div");
+    this.$target = document.createElement("canvas");
+    this.$target.id = "test-canvas2";
+    this.$target.width = "400";
+    this.$target.height = "100";
 
     this.render(this.$parent, this.$target);
 
-    this.$target.style.height = "100px";
-    this.$target.style.backgroundColor = "blue";
-    this.$target.addEventListener("mouseenter", () => {
-      data.increase();
-      console.log(data);
-    });
+    chart(this.$target);
   }
 
   render($parent, element) {

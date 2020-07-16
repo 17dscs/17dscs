@@ -16,7 +16,7 @@ export function randomColor(bigBalls) {
 }
 
 export function randomX(canvas) {
-  let x = Math.floor(Math.random() * canvas.width);
+  let x = Math.floor(Math.random() * canvas.width + canvas.width / 2);
   if (x < 30) {
     x = 30;
   } else if (x + 30 > canvas.width) {
