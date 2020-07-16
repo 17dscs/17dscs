@@ -1,6 +1,6 @@
 {
   "name": "17dscs",
-  "version": "0.0.0-beta1",
+  "version": "0.0.0-beta3",
   "description": "17 data simulation components",
   "main": "dist/Dscomponent.js",
   "module": "dist/Dscomponent.js",
