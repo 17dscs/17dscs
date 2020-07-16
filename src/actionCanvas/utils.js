@@ -12,7 +12,7 @@ export function randomColor(bigBalls) {
 
   let rc = "rgb(" + red + ", " + green + ", " + blue + ")";
   // return rc;
-  return "pink";
+  return "white";
 }
 
 export function randomX(canvas) {

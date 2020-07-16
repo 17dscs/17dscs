@@ -8,8 +8,8 @@ export default class Simulation4 {
     this.$parent = parent;
     this.$target = document.createElement("canvas");
     this.$target.id = "test-canvas2";
-    this.$target.width = "400";
-    this.$target.height = "100";
+    this.$target.width = 400;
+    this.$target.height = 100;
 
     this.render(this.$parent, this.$target);
 

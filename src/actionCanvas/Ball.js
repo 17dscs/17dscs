@@ -20,8 +20,8 @@ export default class Ball {
     ctx.arc(Math.round(this.x), Math.round(this.y), this.radius, 0, 2 * Math.PI);
     ctx.fillStyle = this.color;
     ctx.fill();
-    ctx.strokeStyle = "rgba(0, 0, 0, 0.6)";
-    ctx.stroke();
+    // ctx.strokeStyle = "rgba(0, 0, 0, 0.6)";
+    // ctx.stroke();
     ctx.closePath();
   }
 

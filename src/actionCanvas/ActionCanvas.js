@@ -6,7 +6,8 @@ export default function actionCanvas(canvas) {
   // data.run();
   let ctx = canvas.getContext("2d");
 
-  let objArray = [];
+  let leftBalls = [];
+  let rightBalls = [];
   let paused = false;
   let bumped = false;
 
@@ -25,10 +26,10 @@ export default function actionCanvas(canvas) {
   let currentTime = 0;
   let dt = 0;
 
-  let numStartingSmallBalls = data.getTotalLearner();
-  let numStartingBigBalls = 0;
-
-  document.addEventListener("keydown", keyDownHandler);
+  // let numStartingSmallBalls = data.getTotalLearner();
+  // let numStartingBigBalls = 0;
+  let numStartingLeftBalls = 100;
+  let numStartingRightBalls = 0;
 
   function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -38,14 +39,14 @@ export default function actionCanvas(canvas) {
     if (mousePosition === "right") {
       canvas.style.backgroundColor = "black";
     } else {
-      canvas.style.backgroundColor = "rgb(215, 235, 240)";
+      canvas.style.backgroundColor = "#136A9F";
     }
     ctx.beginPath();
     ctx.rect(0, 0, canvas.width / 2, canvas.height);
     if (mousePosition === "left") {
       ctx.fillStyle = "black";
     } else {
-      ctx.fillStyle = "red";
+      ctx.fillStyle = "#8F1838";
     }
     ctx.fill();
   }
@@ -79,11 +80,11 @@ export default function actionCanvas(canvas) {
     }
   }
 
-  function ballCollision() {
-    for (let i = 0; i < objArray.length - 1; i++) {
-      for (let j = i + 1; j < objArray.length; j++) {
-        let obj1 = objArray[i];
-        let obj2 = objArray[j];
+  function ballCollision(balls) {
+    for (let i = 0; i < balls.length - 1; i++) {
+      for (let j = i + 1; j < balls.length; j++) {
+        let obj1 = balls[i];
+        let obj2 = balls[j];
         let dist = distance(obj1, obj2);
         if (dist < obj1.radius + obj2.radius) {
           let vCollision = { x: obj2.x - obj1.x, y: obj2.y - obj1.y };
@@ -99,58 +100,58 @@ export default function actionCanvas(canvas) {
           staticCollision(obj1, obj2);
         }
       }
-      wallCollision(objArray[i]);
+      wallCollision(balls[i]);
     }
 
-    if (objArray.length > 0) wallCollision(objArray[objArray.length - 1]);
+    if (balls.length > 0) wallCollision(balls[balls.length - 1]);
   }
 
-  function ballCollision2() {
-    for (let i = 0; i < objArray.length - 1; i++) {
-      for (let j = i + 1; j < objArray.length; j++) {
-        let ob1 = objArray[i];
-        let ob2 = objArray[j];
-        let dist = distance(ob1, ob2);
+  // function ballCollision2() {
+  //   for (let i = 0; i < leftBalls.length - 1; i++) {
+  //     for (let j = i + 1; j < leftBalls.length; j++) {
+  //       let ob1 = leftBalls[i];
+  //       let ob2 = leftBalls[j];
+  //       let dist = distance(ob1, ob2);
 
-        if (dist < ob1.radius + ob2.radius) {
-          let theta1 = ob1.angle();
-          let theta2 = ob2.angle();
-          let phi = Math.atan2(ob2.y - ob1.y, ob2.x - ob1.x);
-          let m1 = ob1.mass;
-          let m2 = ob2.mass;
-          let v1 = ob1.speed();
-          let v2 = ob2.speed();
+  //       if (dist < ob1.radius + ob2.radius) {
+  //         let theta1 = ob1.angle();
+  //         let theta2 = ob2.angle();
+  //         let phi = Math.atan2(ob2.y - ob1.y, ob2.x - ob1.x);
+  //         let m1 = ob1.mass;
+  //         let m2 = ob2.mass;
+  //         let v1 = ob1.speed();
+  //         let v2 = ob2.speed();
 
-          let dx1F =
-            ((v1 * Math.cos(theta1 - phi) * (m1 - m2) + 2 * m2 * v2 * Math.cos(theta2 - phi)) / (m1 + m2)) * Math.cos(phi) +
-            v1 * Math.sin(theta1 - phi) * Math.cos(phi + Math.PI / 2);
-          let dy1F =
-            ((v1 * Math.cos(theta1 - phi) * (m1 - m2) + 2 * m2 * v2 * Math.cos(theta2 - phi)) / (m1 + m2)) * Math.sin(phi) +
-            v1 * Math.sin(theta1 - phi) * Math.sin(phi + Math.PI / 2);
-          let dx2F =
-            ((v2 * Math.cos(theta2 - phi) * (m2 - m1) + 2 * m1 * v1 * Math.cos(theta1 - phi)) / (m1 + m2)) * Math.cos(phi) +
-            v2 * Math.sin(theta2 - phi) * Math.cos(phi + Math.PI / 2);
-          let dy2F =
-            ((v2 * Math.cos(theta2 - phi) * (m2 - m1) + 2 * m1 * v1 * Math.cos(theta1 - phi)) / (m1 + m2)) * Math.sin(phi) +
-            v2 * Math.sin(theta2 - phi) * Math.sin(phi + Math.PI / 2);
+  //         let dx1F =
+  //           ((v1 * Math.cos(theta1 - phi) * (m1 - m2) + 2 * m2 * v2 * Math.cos(theta2 - phi)) / (m1 + m2)) * Math.cos(phi) +
+  //           v1 * Math.sin(theta1 - phi) * Math.cos(phi + Math.PI / 2);
+  //         let dy1F =
+  //           ((v1 * Math.cos(theta1 - phi) * (m1 - m2) + 2 * m2 * v2 * Math.cos(theta2 - phi)) / (m1 + m2)) * Math.sin(phi) +
+  //           v1 * Math.sin(theta1 - phi) * Math.sin(phi + Math.PI / 2);
+  //         let dx2F =
+  //           ((v2 * Math.cos(theta2 - phi) * (m2 - m1) + 2 * m1 * v1 * Math.cos(theta1 - phi)) / (m1 + m2)) * Math.cos(phi) +
+  //           v2 * Math.sin(theta2 - phi) * Math.cos(phi + Math.PI / 2);
+  //         let dy2F =
+  //           ((v2 * Math.cos(theta2 - phi) * (m2 - m1) + 2 * m1 * v1 * Math.cos(theta1 - phi)) / (m1 + m2)) * Math.sin(phi) +
+  //           v2 * Math.sin(theta2 - phi) * Math.sin(phi + Math.PI / 2);
 
-          ob1.dx = dx1F;
-          ob1.dy = dy1F;
-          ob2.dx = dx2F;
-          ob2.dy = dy2F;
-          // ob1.dx *= -1;
-          // ob1.dy *= -1;
-          // ob2.dx *= -1;
-          // ob2.dy *= -1;
+  //         ob1.dx = dx1F;
+  //         ob1.dy = dy1F;
+  //         ob2.dx = dx2F;
+  //         ob2.dy = dy2F;
+  //         // ob1.dx *= -1;
+  //         // ob1.dy *= -1;
+  //         // ob2.dx *= -1;
+  //         // ob2.dy *= -1;
 
-          staticCollision(ob1, ob2);
-        }
-      }
-      wallCollision(objArray[i]);
-    }
+  //         staticCollision(ob1, ob2);
+  //       }
+  //     }
+  //     wallCollision(leftBalls[i]);
+  //   }
 
-    if (objArray.length > 0) wallCollision(objArray[objArray.length - 1]);
-  }
+  //   if (leftBalls.length > 0) wallCollision(leftBalls[leftBalls.length - 1]);
+  // }
 
   function staticCollision(ob1, ob2, emergency = false) {
     let overlap = ob1.radius + ob2.radius - distance(ob1, ob2);
@@ -178,71 +179,71 @@ export default function actionCanvas(canvas) {
     }
   }
 
-  function keyDownHandler(event) {
-    if (event.keyCode == 67) {
-      // c
-      objArray[objArray.length] = new Ball(randomX(canvas), randomY(canvas), 5, bigBalls);
-    } else if (event.keyCode == 80) {
-      // p
-      paused = !paused;
-    } else if (event.keyCode == 71) {
-      // g
-      // This feature WAS taken out
-      // because of a bug where
-      // balls "merge" with each other
-      // when under a lot of pressure.
+  // function keyDownHandler(event) {
+  //   if (event.keyCode == 67) {
+  //     // c
+  //     leftBalls[leftBalls.length] = new Ball(randomX(canvas), randomY(canvas), 5, bigBalls);
+  //   } else if (event.keyCode == 80) {
+  //     // p
+  //     paused = !paused;
+  //   } else if (event.keyCode == 71) {
+  //     // g
+  //     // This feature WAS taken out
+  //     // because of a bug where
+  //     // balls "merge" with each other
+  //     // when under a lot of pressure.
 
-      // putting back in
+  //     // putting back in
 
-      gravityOn = !gravityOn;
-    } else if (event.keyCode == 65) {
-      // A
-      leftHeld = true;
-    } else if (event.keyCode == 87) {
-      // W
-      upHeld = true;
-    } else if (event.keyCode == 68) {
-      // D
-      rightHeld = true;
-    } else if (event.keyCode == 83) {
-      // S
-      downHeld = true;
-    } else if (event.keyCode == 82) {
-      // r
-      objArray = [];
-    } else if (event.keyCode == 75) {
-      // k
-      clearCanv = !clearCanv;
-    } else if (event.keyCode == 88) {
-      // x
-      bigBalls = !bigBalls;
-    }
-  }
+  //     gravityOn = !gravityOn;
+  //   } else if (event.keyCode == 65) {
+  //     // A
+  //     leftHeld = true;
+  //   } else if (event.keyCode == 87) {
+  //     // W
+  //     upHeld = true;
+  //   } else if (event.keyCode == 68) {
+  //     // D
+  //     rightHeld = true;
+  //   } else if (event.keyCode == 83) {
+  //     // S
+  //     downHeld = true;
+  //   } else if (event.keyCode == 82) {
+  //     // r
+  //     leftBalls = [];
+  //   } else if (event.keyCode == 75) {
+  //     // k
+  //     clearCanv = !clearCanv;
+  //   } else if (event.keyCode == 88) {
+  //     // x
+  //     bigBalls = !bigBalls;
+  //   }
+  // }
 
-  function applyGravity() {
-    for (let obj in objArray) {
-      let ob = objArray[obj];
-      if (ob.onGround() == false) {
-        ob.dy += 0.29;
-      }
+  // function applyGravity() {
+  //   for (let obj in leftBalls) {
+  //     let ob = leftBalls[obj];
+  //     if (ob.onGround() == false) {
+  //       ob.dy += 0.29;
+  //     }
 
-      // apply basic drag
-      ob.dx *= 0.99;
-      ob.dy *= 0.975;
-    }
-  }
+  //     // apply basic drag
+  //     ob.dx *= 0.99;
+  //     ob.dy *= 0.975;
+  //   }
+  // }
 
-  function moveObjects() {
-    for (let i = 0; i < objArray.length; i++) {
-      let ob = objArray[i];
+  function moveObjects(balls) {
+    for (let i = 0; i < balls.length; i++) {
+      let ob = balls[i];
       ob.x += ob.dx * dt;
       ob.y += ob.dy * dt;
     }
   }
 
-  function drawObjects() {
-    for (let obj in objArray) {
-      objArray[obj].draw(ctx);
+  function drawObjects(balls) {
+    for (let obj in balls) {
+      balls[obj].draw(ctx);
     }
   }
 
@@ -262,20 +263,28 @@ export default function actionCanvas(canvas) {
       if (gravityOn) {
         applyGravity(); // (and drag)
       }
-      moveObjects();
-      ballCollision();
+      moveObjects(leftBalls);
+      moveObjects(rightBalls);
+      ballCollision(leftBalls);
+      ballCollision(rightBalls);
     }
 
-    drawObjects();
+    drawObjects(leftBalls);
+    drawObjects(rightBalls);
 
     if (mouseon) {
       // The size of the emoji is set with the font
-      ctx.font = "20px serif";
+      ctx.font = "16px serif";
       // use these alignment properties for "better" positioning
       ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
+      ctx.textBaseline = "top";
       // draw the emoji
-      ctx.fillText("☁️", offsetX, offsetY);
+      if (mousePosition === "left") {
+        ctx.fillText("🌐ONLINE EDU", offsetX, offsetY);
+      }
+      if (mousePosition === "right") {
+        ctx.fillText("🏫GOOD FACILITY", offsetX, offsetY);
+      }
     }
 
     //logger();
@@ -289,41 +298,62 @@ export default function actionCanvas(canvas) {
   }
 
   // spawn the initial small thingies.
-  for (i = 0; i < numStartingSmallBalls; i++) {
-    objArray[objArray.length] = new Ball(randomX(canvas), randomY(canvas), 5, bigBalls);
+  for (i = 0; i < numStartingLeftBalls; i++) {
+    leftBalls[leftBalls.length] = new Ball(randomX(canvas), randomY(canvas), 5, bigBalls);
   }
 
-  // manually spawn the few large ones that
-  // start with no velocity. (lazy code)
-  bigBalls = true;
-  for (i = 0; i < numStartingBigBalls; i++) {
-    let temp = new Ball(randomX(canvas), randomY(canvas), randomRadius(bigBalls), bigBalls);
-    temp.dx = randomDx() / 8;
-    temp.dy = randomDy() / 12;
-    objArray[objArray.length] = temp;
-  }
+  // // manually spawn the few large ones that
+  // // start with no velocity. (lazy code)
+  // bigBalls = true;
+  // for (i = 0; i < numStartingBigBalls; i++) {
+  //   let temp = new Ball(randomX(canvas), randomY(canvas), randomRadius(bigBalls), bigBalls);
+  //   temp.dx = randomDx() / 8;
+  //   temp.dy = randomDy() / 12;
+  //   leftBalls[leftBalls.length] = temp;
+  // }
 
-  setTimeout(() => {
-    const interval = setInterval(() => {
-      objArray.splice(0, 1);
-      objArray[objArray.length] = new Ball(30, randomY(canvas), 5, bigBalls);
-      // if (data.getAffectedLearner() > data.getTotalLearner()) clearInterval(interval);
-      // // console.log(data.getAffectedLearner(), data.getSubtractAffectedLearner(), data.getTotalLearner());
-      // // console.log(objArray.length);
-      // for (let j = 0; j < data.getSubtractAffectedLearner(); j++) {
-      //   if (objArray[i].x > canvas.width / 2) {
-      //     console.log(data.getAffectedLearner(), data.getTotalLearner());
-      //     objArray.splice(i, 1);
-      //     objArray[objArray.length] = new Ball(30, randomY(canvas), 5, bigBalls);
-      //     break;
-      //   }
-      // }
-    }, 100);
-  }, 5000);
+  let prevData = 0;
+  let currentData = 0;
+  let time = 0;
+  const interval = setInterval(() => {
+    time += 200;
+    if (time > 17000) clearInterval(interval);
+    const covidRate = data.covidDataDiff;
+    currentData = covidRate;
+    let diff = currentData - prevData;
+    if (diff > 0) {
+      for (let i = 0; i < Math.round(diff); i++) {
+        leftBalls.splice(0, 1);
+        rightBalls[rightBalls.length] = new Ball(30, randomY(canvas), 5, bigBalls);
+      }
+    } else {
+      if (mouseon) {
+        for (let i = 0; i < Math.round(Math.abs(diff) + 0.3); i++) {
+          rightBalls.splice(0, 1);
+          leftBalls[leftBalls.length] = new Ball(randomX(canvas), randomY(canvas), 5, bigBalls);
+        }
+      } else {
+        for (let i = 0; i < Math.round(Math.abs(diff)); i++) {
+          rightBalls.splice(0, 1);
+          leftBalls[leftBalls.length] = new Ball(randomX(canvas), randomY(canvas), 5, bigBalls);
+        }
+      }
+    }
+    prevData = currentData;
+  }, 200);
 
   draw();
 
+  let tempInterval;
+
   canvas.addEventListener("mousemove", onMouseMove, false);
+  canvas.addEventListener("mouseenter", () => {
+    if (!data.isDrawed) {
+      tempInterval = setInterval(() => {
+        data.updateFutureData();
+      }, 100);
+    }
+  });
   function onMouseMove(e) {
     mouseon = true;
     offsetX = e.offsetX;
@@ -339,6 +369,7 @@ export default function actionCanvas(canvas) {
     () => {
       mouseon = false;
       mousePosition = false;
+      clearInterval(tempInterval);
     },
     false,
   );

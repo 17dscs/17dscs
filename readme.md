@@ -1,6 +1,14 @@
 # Components
 
-## 테스트 방법
+## Preview
+
+![](./images/example.gif)
+
+## Description
+
+-
+
+## Testing
 
 1. 빌드
 
@@ -35,27 +43,3 @@ root/test-demo/index.html 파일 열어서확인
 │   ├── datas 공유될 데이터
 ├── test-demo / 빌드된 파일 테스트하는 곳
 ```
-
-## Data sharing
-
-```js
-// data.js 구조
-class Data {
-  constructor() {
-    this.time = 0;
-  }
-  increase() {
-    this.time += 1;
-  }
-}
-
-const data = new Data();
-
-export default data;
-```
-
-실제 데이터는 class의 property로 property 조작은 메소드로 진행
-
-데이터 사용은 `import data from './datas/data'`
-
-예를들어, 유저액션 뷰에서 `setInterval`로 1초마다 `data.increase()`를 하면 데이터시뮬레이션 뷰에서도 data변화가 적용됨.

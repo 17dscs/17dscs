@@ -1,6 +1,6 @@
 function randomColor(bigBalls) {
   // return rc;
-  return "pink";
+  return "white";
 }
 
 function randomX(canvas) {
@@ -21,17 +21,6 @@ function randomY(canvas) {
     y = canvas.height - 30;
   }
   return y;
-}
-
-function randomRadius(bigBalls) {
-  if (bigBalls) {
-    let r = Math.ceil(Math.random() * 10 + 20);
-    return r;
-  } else {
-    // let r = Math.ceil(Math.random() * 2 + 2);
-    let r = 5;
-    return r;
-  }
 }
 
 function randomDx() {
@@ -74,8 +63,8 @@ class Ball {
     ctx.arc(Math.round(this.x), Math.round(this.y), this.radius, 0, 2 * Math.PI);
     ctx.fillStyle = this.color;
     ctx.fill();
-    ctx.strokeStyle = "rgba(0, 0, 0, 0.6)";
-    ctx.stroke();
+    // ctx.strokeStyle = "rgba(0, 0, 0, 0.6)";
+    // ctx.stroke();
     ctx.closePath();
   }
 
@@ -92,18 +81,59 @@ class Ball {
   }
 }
 
+const covidDataChart = ["1(0216)", "2(0301)", "3(0316)", "4(0401)", "5(0503)", "6(future)", "7(future)", "8(last)"];
+
+let time = 0;
+let offset = 2428;
+let timepass = false;
+
 class Data {
   constructor() {
     this.affectedLearner = 999014;
     this.pastAffectedLearner = 0;
     this.totalLearner = this.affectedLearner * 1000;
+    this.isDrawed = false;
+    this.chartInterval = 0;
+    this.covidDataDiff = 0;
     this.covidData = {
-      "0216": 1,
-      "0301": 17.1,
-      "0316": 44,
-      "0401": 91.3,
+      "1(0216)": 0,
+      "2(0301)": 17.1,
+      "3(0316)": 44,
+      "4(0401)": 91.3,
+      "5(0503)": 73.4,
+      "6(future)": 72,
+      "7(future)": 71,
+      "8(last)": 69,
     };
+
+    const interval = setInterval(() => {
+      time += 200;
+      if (time > 17000) clearInterval(interval);
+      if (time > 0 && time < offset) {
+        this.covidDataDiff += (this.covidData[covidDataChart[1]] - this.covidData[covidDataChart[0]]) / 11.7;
+      }
+      if (time > offset && time < offset * 2) {
+        this.covidDataDiff += (this.covidData[covidDataChart[2]] - this.covidData[covidDataChart[1]]) / 11.7;
+      }
+      if (time > offset * 2 && time < offset * 3) {
+        this.covidDataDiff += (this.covidData[covidDataChart[3]] - this.covidData[covidDataChart[2]]) / 11.7;
+      }
+      if (time > offset * 3 && time < offset * 4) {
+        this.covidDataDiff += (this.covidData[covidDataChart[4]] - this.covidData[covidDataChart[3]]) / 11.7;
+      }
+      if (time > offset * 4 && time < offset * 5) {
+        timepass = true;
+        this.covidDataDiff += (this.covidData[covidDataChart[5]] - this.covidData[covidDataChart[4]]) / 11.7;
+      }
+      if (time > offset * 5 && time < offset * 6) {
+        this.covidDataDiff += (this.covidData[covidDataChart[6]] - this.covidData[covidDataChart[5]]) / 11.7;
+      }
+      if (time > offset * 6 && time < offset * 7) {
+        this.covidDataDiff += (this.covidData[covidDataChart[7]] - this.covidData[covidDataChart[6]]) / 11.7;
+      }
+    }, 200);
   }
+
   getSubtractAffectedLearner() {
     return Math.floor(this.affectedLearner / 10000000) - Math.floor(this.pastAffectedLearner / 10000000);
   }
@@ -113,14 +143,21 @@ class Data {
   getTotalLearner() {
     return Math.floor(this.totalLearner / 10000000);
   }
-  run() {
-    const interval = setInterval(() => {
-      if (this.affectedLearner > this.totalLearner) {
-        clearInterval(interval);
+  updateFutureData() {
+    if (timepass) {
+      if (time > offset * 4 && time < offset * 5) {
+        this.covidData[covidDataChart[5]] -= 0.8;
+        this.covidData[covidDataChart[6]] -= 0.8;
+        this.covidData[covidDataChart[7]] -= 0.8;
       }
-      this.pastAffectedLearner = this.affectedLearner;
-      this.affectedLearner *= 1.5;
-    }, 1000);
+      if (time > offset * 5 && time < offset * 6) {
+        this.covidData[covidDataChart[6]] -= 0.8;
+        this.covidData[covidDataChart[7]] -= 0.8;
+      }
+      if (time > offset * 6 && time < offset * 7) {
+        this.covidData[covidDataChart[7]] -= 0.8;
+      }
+    }
   }
 }
 
@@ -130,17 +167,13 @@ function actionCanvas(canvas) {
   // data.run();
   let ctx = canvas.getContext("2d");
 
-  let objArray = [];
-  let paused = false;
+  let leftBalls = [];
+  let rightBalls = [];
 
   let mouseon = false;
   let offsetX = 0;
   let offsetY = 0;
   let mousePosition = false;
-
-  let gravityOn = false;
-
-  let clearCanv = true;
 
   let bigBalls = false;
 
@@ -148,10 +181,9 @@ function actionCanvas(canvas) {
   let currentTime = 0;
   let dt = 0;
 
-  let numStartingSmallBalls = data.getTotalLearner();
-  let numStartingBigBalls = 0;
-
-  document.addEventListener("keydown", keyDownHandler);
+  // let numStartingSmallBalls = data.getTotalLearner();
+  // let numStartingBigBalls = 0;
+  let numStartingLeftBalls = 100;
 
   function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -161,14 +193,14 @@ function actionCanvas(canvas) {
     if (mousePosition === "right") {
       canvas.style.backgroundColor = "black";
     } else {
-      canvas.style.backgroundColor = "rgb(215, 235, 240)";
+      canvas.style.backgroundColor = "#136A9F";
     }
     ctx.beginPath();
     ctx.rect(0, 0, canvas.width / 2, canvas.height);
     if (mousePosition === "left") {
       ctx.fillStyle = "black";
     } else {
-      ctx.fillStyle = "red";
+      ctx.fillStyle = "#8F1838";
     }
     ctx.fill();
   }
@@ -202,11 +234,11 @@ function actionCanvas(canvas) {
     }
   }
 
-  function ballCollision() {
-    for (let i = 0; i < objArray.length - 1; i++) {
-      for (let j = i + 1; j < objArray.length; j++) {
-        let obj1 = objArray[i];
-        let obj2 = objArray[j];
+  function ballCollision(balls) {
+    for (let i = 0; i < balls.length - 1; i++) {
+      for (let j = i + 1; j < balls.length; j++) {
+        let obj1 = balls[i];
+        let obj2 = balls[j];
         let dist = distance(obj1, obj2);
         if (dist < obj1.radius + obj2.radius) {
           let vCollision = { x: obj2.x - obj1.x, y: obj2.y - obj1.y };
@@ -222,11 +254,58 @@ function actionCanvas(canvas) {
           staticCollision(obj1, obj2);
         }
       }
-      wallCollision(objArray[i]);
+      wallCollision(balls[i]);
     }
 
-    if (objArray.length > 0) wallCollision(objArray[objArray.length - 1]);
+    if (balls.length > 0) wallCollision(balls[balls.length - 1]);
   }
+
+  // function ballCollision2() {
+  //   for (let i = 0; i < leftBalls.length - 1; i++) {
+  //     for (let j = i + 1; j < leftBalls.length; j++) {
+  //       let ob1 = leftBalls[i];
+  //       let ob2 = leftBalls[j];
+  //       let dist = distance(ob1, ob2);
+
+  //       if (dist < ob1.radius + ob2.radius) {
+  //         let theta1 = ob1.angle();
+  //         let theta2 = ob2.angle();
+  //         let phi = Math.atan2(ob2.y - ob1.y, ob2.x - ob1.x);
+  //         let m1 = ob1.mass;
+  //         let m2 = ob2.mass;
+  //         let v1 = ob1.speed();
+  //         let v2 = ob2.speed();
+
+  //         let dx1F =
+  //           ((v1 * Math.cos(theta1 - phi) * (m1 - m2) + 2 * m2 * v2 * Math.cos(theta2 - phi)) / (m1 + m2)) * Math.cos(phi) +
+  //           v1 * Math.sin(theta1 - phi) * Math.cos(phi + Math.PI / 2);
+  //         let dy1F =
+  //           ((v1 * Math.cos(theta1 - phi) * (m1 - m2) + 2 * m2 * v2 * Math.cos(theta2 - phi)) / (m1 + m2)) * Math.sin(phi) +
+  //           v1 * Math.sin(theta1 - phi) * Math.sin(phi + Math.PI / 2);
+  //         let dx2F =
+  //           ((v2 * Math.cos(theta2 - phi) * (m2 - m1) + 2 * m1 * v1 * Math.cos(theta1 - phi)) / (m1 + m2)) * Math.cos(phi) +
+  //           v2 * Math.sin(theta2 - phi) * Math.cos(phi + Math.PI / 2);
+  //         let dy2F =
+  //           ((v2 * Math.cos(theta2 - phi) * (m2 - m1) + 2 * m1 * v1 * Math.cos(theta1 - phi)) / (m1 + m2)) * Math.sin(phi) +
+  //           v2 * Math.sin(theta2 - phi) * Math.sin(phi + Math.PI / 2);
+
+  //         ob1.dx = dx1F;
+  //         ob1.dy = dy1F;
+  //         ob2.dx = dx2F;
+  //         ob2.dy = dy2F;
+  //         // ob1.dx *= -1;
+  //         // ob1.dy *= -1;
+  //         // ob2.dx *= -1;
+  //         // ob2.dy *= -1;
+
+  //         staticCollision(ob1, ob2);
+  //       }
+  //     }
+  //     wallCollision(leftBalls[i]);
+  //   }
+
+  //   if (leftBalls.length > 0) wallCollision(leftBalls[leftBalls.length - 1]);
+  // }
 
   function staticCollision(ob1, ob2, emergency = false) {
     let overlap = ob1.radius + ob2.radius - distance(ob1, ob2);
@@ -254,71 +333,71 @@ function actionCanvas(canvas) {
     }
   }
 
-  function keyDownHandler(event) {
-    if (event.keyCode == 67) {
-      // c
-      objArray[objArray.length] = new Ball(randomX(canvas), randomY(canvas), 5, bigBalls);
-    } else if (event.keyCode == 80) {
-      // p
-      paused = !paused;
-    } else if (event.keyCode == 71) {
-      // g
-      // This feature WAS taken out
-      // because of a bug where
-      // balls "merge" with each other
-      // when under a lot of pressure.
+  // function keyDownHandler(event) {
+  //   if (event.keyCode == 67) {
+  //     // c
+  //     leftBalls[leftBalls.length] = new Ball(randomX(canvas), randomY(canvas), 5, bigBalls);
+  //   } else if (event.keyCode == 80) {
+  //     // p
+  //     paused = !paused;
+  //   } else if (event.keyCode == 71) {
+  //     // g
+  //     // This feature WAS taken out
+  //     // because of a bug where
+  //     // balls "merge" with each other
+  //     // when under a lot of pressure.
 
-      // putting back in
+  //     // putting back in
 
-      gravityOn = !gravityOn;
-    } else if (event.keyCode == 65) {
-      // A
-      leftHeld = true;
-    } else if (event.keyCode == 87) {
-      // W
-      upHeld = true;
-    } else if (event.keyCode == 68) {
-      // D
-      rightHeld = true;
-    } else if (event.keyCode == 83) {
-      // S
-      downHeld = true;
-    } else if (event.keyCode == 82) {
-      // r
-      objArray = [];
-    } else if (event.keyCode == 75) {
-      // k
-      clearCanv = !clearCanv;
-    } else if (event.keyCode == 88) {
-      // x
-      bigBalls = !bigBalls;
-    }
-  }
+  //     gravityOn = !gravityOn;
+  //   } else if (event.keyCode == 65) {
+  //     // A
+  //     leftHeld = true;
+  //   } else if (event.keyCode == 87) {
+  //     // W
+  //     upHeld = true;
+  //   } else if (event.keyCode == 68) {
+  //     // D
+  //     rightHeld = true;
+  //   } else if (event.keyCode == 83) {
+  //     // S
+  //     downHeld = true;
+  //   } else if (event.keyCode == 82) {
+  //     // r
+  //     leftBalls = [];
+  //   } else if (event.keyCode == 75) {
+  //     // k
+  //     clearCanv = !clearCanv;
+  //   } else if (event.keyCode == 88) {
+  //     // x
+  //     bigBalls = !bigBalls;
+  //   }
+  // }
 
-  function applyGravity() {
-    for (let obj in objArray) {
-      let ob = objArray[obj];
-      if (ob.onGround() == false) {
-        ob.dy += 0.29;
-      }
+  // function applyGravity() {
+  //   for (let obj in leftBalls) {
+  //     let ob = leftBalls[obj];
+  //     if (ob.onGround() == false) {
+  //       ob.dy += 0.29;
+  //     }
 
-      // apply basic drag
-      ob.dx *= 0.99;
-      ob.dy *= 0.975;
-    }
-  }
+  //     // apply basic drag
+  //     ob.dx *= 0.99;
+  //     ob.dy *= 0.975;
+  //   }
+  // }
 
-  function moveObjects() {
-    for (let i = 0; i < objArray.length; i++) {
-      let ob = objArray[i];
+  function moveObjects(balls) {
+    for (let i = 0; i < balls.length; i++) {
+      let ob = balls[i];
       ob.x += ob.dx * dt;
       ob.y += ob.dy * dt;
     }
   }
 
-  function drawObjects() {
-    for (let obj in objArray) {
-      objArray[obj].draw(ctx);
+  function drawObjects(balls) {
+    for (let obj in balls) {
+      balls[obj].draw(ctx);
     }
   }
 
@@ -331,27 +410,32 @@ function actionCanvas(canvas) {
     // we increase the speed of time
     dt *= 20;
 
-    if (clearCanv) clearCanvas();
+    clearCanvas();
     canvasBackground();
 
-    if (!paused) {
-      if (gravityOn) {
-        applyGravity(); // (and drag)
-      }
-      moveObjects();
-      ballCollision();
+    {
+      moveObjects(leftBalls);
+      moveObjects(rightBalls);
+      ballCollision(leftBalls);
+      ballCollision(rightBalls);
     }
 
-    drawObjects();
+    drawObjects(leftBalls);
+    drawObjects(rightBalls);
 
     if (mouseon) {
       // The size of the emoji is set with the font
-      ctx.font = "20px serif";
+      ctx.font = "16px serif";
       // use these alignment properties for "better" positioning
       ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
+      ctx.textBaseline = "top";
       // draw the emoji
-      ctx.fillText("☁️", offsetX, offsetY);
+      if (mousePosition === "left") {
+        ctx.fillText("🌐ONLINE EDU", offsetX, offsetY);
+      }
+      if (mousePosition === "right") {
+        ctx.fillText("🏫GOOD FACILITY", offsetX, offsetY);
+      }
     }
 
     //logger();
@@ -361,41 +445,62 @@ function actionCanvas(canvas) {
   }
 
   // spawn the initial small thingies.
-  for (i = 0; i < numStartingSmallBalls; i++) {
-    objArray[objArray.length] = new Ball(randomX(canvas), randomY(canvas), 5, bigBalls);
+  for (i = 0; i < numStartingLeftBalls; i++) {
+    leftBalls[leftBalls.length] = new Ball(randomX(canvas), randomY(canvas), 5, bigBalls);
   }
 
-  // manually spawn the few large ones that
-  // start with no velocity. (lazy code)
-  bigBalls = true;
-  for (i = 0; i < numStartingBigBalls; i++) {
-    let temp = new Ball(randomX(canvas), randomY(canvas), randomRadius(bigBalls), bigBalls);
-    temp.dx = randomDx() / 8;
-    temp.dy = randomDy() / 12;
-    objArray[objArray.length] = temp;
-  }
+  // // manually spawn the few large ones that
+  // // start with no velocity. (lazy code)
+  // bigBalls = true;
+  // for (i = 0; i < numStartingBigBalls; i++) {
+  //   let temp = new Ball(randomX(canvas), randomY(canvas), randomRadius(bigBalls), bigBalls);
+  //   temp.dx = randomDx() / 8;
+  //   temp.dy = randomDy() / 12;
+  //   leftBalls[leftBalls.length] = temp;
+  // }
 
-  setTimeout(() => {
-    const interval = setInterval(() => {
-      objArray.splice(0, 1);
-      objArray[objArray.length] = new Ball(30, randomY(canvas), 5, bigBalls);
-      // if (data.getAffectedLearner() > data.getTotalLearner()) clearInterval(interval);
-      // // console.log(data.getAffectedLearner(), data.getSubtractAffectedLearner(), data.getTotalLearner());
-      // // console.log(objArray.length);
-      // for (let j = 0; j < data.getSubtractAffectedLearner(); j++) {
-      //   if (objArray[i].x > canvas.width / 2) {
-      //     console.log(data.getAffectedLearner(), data.getTotalLearner());
-      //     objArray.splice(i, 1);
-      //     objArray[objArray.length] = new Ball(30, randomY(canvas), 5, bigBalls);
-      //     break;
-      //   }
-      // }
-    }, 100);
-  }, 5000);
+  let prevData = 0;
+  let currentData = 0;
+  let time = 0;
+  const interval = setInterval(() => {
+    time += 200;
+    if (time > 17000) clearInterval(interval);
+    const covidRate = data.covidDataDiff;
+    currentData = covidRate;
+    let diff = currentData - prevData;
+    if (diff > 0) {
+      for (let i = 0; i < Math.round(diff); i++) {
+        leftBalls.splice(0, 1);
+        rightBalls[rightBalls.length] = new Ball(30, randomY(canvas), 5, bigBalls);
+      }
+    } else {
+      if (mouseon) {
+        for (let i = 0; i < Math.round(Math.abs(diff) + 0.3); i++) {
+          rightBalls.splice(0, 1);
+          leftBalls[leftBalls.length] = new Ball(randomX(canvas), randomY(canvas), 5, bigBalls);
+        }
+      } else {
+        for (let i = 0; i < Math.round(Math.abs(diff)); i++) {
+          rightBalls.splice(0, 1);
+          leftBalls[leftBalls.length] = new Ball(randomX(canvas), randomY(canvas), 5, bigBalls);
+        }
+      }
+    }
+    prevData = currentData;
+  }, 200);
 
   draw();
 
+  let tempInterval;
+
   canvas.addEventListener("mousemove", onMouseMove, false);
+  canvas.addEventListener("mouseenter", () => {
+    if (!data.isDrawed) {
+      tempInterval = setInterval(() => {
+        data.updateFutureData();
+      }, 100);
+    }
+  });
   function onMouseMove(e) {
     mouseon = true;
     offsetX = e.offsetX;
@@ -411,6 +516,7 @@ function actionCanvas(canvas) {
     () => {
       mouseon = false;
       mousePosition = false;
+      clearInterval(tempInterval);
     },
     false,
   );
@@ -455,14 +561,32 @@ function chart(canvas) {
   let currentTime = 0;
   let dt = 0;
 
-  const entries = Object.entries(covidData);
+  let entries;
 
   // setInterval(() => {
   //   data.push(11);
   // }, 1000);
 
-  drawTempChart();
   drawChart();
+
+  // function drawGrid() {
+  //   let xGrid = 10;
+  //   let yGrid = 10;
+  //   let cellSize = 10;
+  //   tempCtx.beginPath();
+  //   while (xGrid < canvas.height) {
+  //     tempCtx.moveTo(0, xGrid);
+  //     tempCtx.lineTo(canvas.width, xGrid);
+  //     xGrid += cellSize;
+  //   }
+  //   while (yGrid < canvas.width) {
+  //     tempCtx.moveTo(yGrid, 0);
+  //     tempCtx.lineTo(yGrid, canvas.height);
+  //     yGrid += cellSize;
+  //   }
+  //   tempCtx.strokeStyle = "#ccc";
+  //   tempCtx.stroke();
+  // }
 
   function drawAxis() {
     let yPlot = 90;
@@ -470,15 +594,19 @@ function chart(canvas) {
 
     tempCtx.beginPath();
     tempCtx.strokeStyle = "black";
+    tempCtx.fillStyle = "#136A9F";
     tempCtx.moveTo(50, 20);
     tempCtx.lineTo(50, 80);
     tempCtx.lineTo(380, 80);
     tempCtx.lineTo(380, 20);
     tempCtx.lineTo(50, 20);
     tempCtx.moveTo(50, 80);
+    tempCtx.fill();
+
+    tempCtx.fillStyle = "black";
 
     for (let i = 0; i < 2; i++) {
-      tempCtx.strokeText(pop, 20, yPlot);
+      tempCtx.fillText(pop, 20, yPlot);
       pop += 100;
       yPlot -= 70;
     }
@@ -486,22 +614,36 @@ function chart(canvas) {
   }
 
   function drawTempChart() {
+    tempCtx.clearRect(0, 0, canvas.width, canvas.height);
+    tempCtx.fillStyle = "white";
+    tempCtx.rect(0, 0, canvas.width, canvas.height);
+    tempCtx.fill();
     drawAxis();
     tempCtx.beginPath();
     tempCtx.strokeStyle = "black";
     tempCtx.moveTo(50, 80);
     tempCtx.font = "bold normal 10px Verdana";
 
-    var xPlot = 100;
+    var xPlot = 50;
+
+    entries = Object.entries(covidData);
 
     for (const [key, value] of entries) {
-      var valueInBlocks = 100;
       var valueY = (60 * (100 - value)) / 100 + 20;
-      tempCtx.fillText("(" + key + ")", xPlot, valueInBlocks - 5);
+      // tempCtx.fillText("(" + key + ")", xPlot, valueInBlocks - 5);
+      if (key === "8(last)") {
+        tempCtx.lineTo(380 - 1, valueY);
+        continue;
+      }
+      if (key !== "1(0216)") {
+        tempCtx.fillStyle = "#8F1838";
+      }
+      // tempCtx.arc(xPlot, valueY, 2, 0, Math.PI * 2, true);
       tempCtx.lineTo(xPlot, valueY);
       xPlot += 50;
     }
-    tempCtx.stroke();
+    tempCtx.lineTo(380, 80);
+    tempCtx.fill();
   }
 
   function putImageData(ctx, imageData, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight) {
@@ -526,19 +668,22 @@ function chart(canvas) {
 
   function drawChart() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawTempChart();
     currentTime = new Date().getTime();
     dt = (currentTime - lastTime) / 1000; // delta time in seconds
-
     // dirty and lazy solution
     // instead of scaling up every velocity vector the program
     // we increase the speed of time
     dt *= 20;
-    if (currentTime - lastTime < 20000) {
+    if (currentTime - lastTime < 16500) {
       const imageData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
-      putImageData(ctx, imageData, 0, 0, 0, 0, dt, canvas.height);
+      ctx.rect(0, 0, canvas.width, canvas.height);
+      ctx.fill();
+      putImageData(ctx, imageData, 0, 0, 0, 0, 50 + dt, canvas.height);
 
       requestAnimationFrame(drawChart);
     } else {
+      data.isDrawed = true;
       const imageData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
       putImageData(ctx, imageData, 0, 0, 0, 0, canvas.width, canvas.height);
     }
@@ -552,8 +697,8 @@ class Simulation4 {
     this.$parent = parent;
     this.$target = document.createElement("canvas");
     this.$target.id = "test-canvas2";
-    this.$target.width = "400";
-    this.$target.height = "100";
+    this.$target.width = 400;
+    this.$target.height = 100;
 
     this.render(this.$parent, this.$target);
 
