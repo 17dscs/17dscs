@@ -2,7 +2,7 @@
 
 ## Preview
 
-![](./images/example.gif)
+![](https://github.com/17dscs/17dscs/blob/master/images/example.gif/raw?=true)
 
 ## Description
 
